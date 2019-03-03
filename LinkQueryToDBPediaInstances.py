@@ -24,4 +24,5 @@ def find_relevant_dbpedia_articles_to_query(query):
                 print("This dbpedia entry does not exist" + "\n")
                 continue
 
-find_relevant_dbpedia_articles_to_query('Barack Obama White House')
+# Keep in mind that the query is case sensitive
+find_relevant_dbpedia_articles_to_query('')
