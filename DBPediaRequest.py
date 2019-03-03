@@ -4,6 +4,7 @@ import sys
 
 class DBPediaRequest:
     def __init__(self, subject):
+        self.redirected = False
         subject_underscore = subject.replace(' ', '_')
         self.dbpedia_url = 'http://dbpedia.org/data/' + subject_underscore + '.json'
 
@@ -12,7 +13,7 @@ class DBPediaRequest:
             self.resource = data['http://dbpedia.org/resource/' + subject.replace(' ', '_')]
         except KeyError:
             print('This dbpedia entry does not exist')
-            sys.exit()
+            self.resource = ""
 
         # If a common misspelling of a query is encountered, go to the redirected (and thus correct) page
         if len(self.get_related_subject_list()) is 7:
@@ -25,6 +26,7 @@ class DBPediaRequest:
 
             try:
                 self.resource = data['http://dbpedia.org/resource/' + new_subject]
+                self.redirected = True
             except KeyError:
                 print('This dbpedia entry does not exist')
                 sys.exit()
@@ -39,10 +41,14 @@ class DBPediaRequest:
 
     def get_all_information_on_subject(self):
         information_list = self.get_related_subject_list()
+        if self.redirected:
+            print('Redirected to subject: ' + str(self.dbpedia_url))
+        else:
+            print('Subject: ' + str(self.dbpedia_url))
 
         for key in information_list:
             try:
-                print(key + ' ' + str(self.resource['http://dbpedia.org/ontology/' + key]))
+                print(key + ': ' + str(self.resource['http://dbpedia.org/ontology/' + key]))
             except KeyError:
                 None
             except:
