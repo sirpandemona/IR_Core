@@ -6,8 +6,11 @@ from nltk.util import ngrams
 
 
 def get_relevant_concepts_from_dbpedia(query: str) -> list:
-    return spotlight.candidates("http://model.dbpedia-spotlight.org/en/candidates", capitalize_all_words(query),
-                                confidence=0.3, support=20, spotter='Default')
+    try:
+        return spotlight.candidates("http://model.dbpedia-spotlight.org/en/candidates", capitalize_all_words(query),
+                                    confidence=0.5, support=20, spotter='Default')
+    except spotlight.SpotlightException:
+        return [] #nothing found; return empty list
 
 
 def get_n_resources_with_highest_support(n: int, candidates: list) -> list:
@@ -25,7 +28,8 @@ def get_n_resources_with_highest_support(n: int, candidates: list) -> list:
                 current_entry_support = entry['resource']['support']
                 candidate_uri = candidate['resource']['uri']
                 entry_uri = entry['resource']['uri']
-                if current_candidate_support > current_entry_support and not contained_uri_list.__contains__(candidate_uri):
+                if current_candidate_support > current_entry_support and not contained_uri_list.__contains__(
+                        candidate_uri):
                     result_list.remove(entry)
                     contained_uri_list.remove(entry_uri)
                     result_list.append(candidate)
@@ -49,9 +53,9 @@ def get_uris(candidates: list) -> list:
 
 def get_ngrams(text):
     ngram_list = []
-    for i in range(1, len(text.split())+1):
+    for i in range(1, len(text.split()) + 1):
         n_grams = ngrams(word_tokenize(text), i)
-        ngram_list.append([ ' '.join(grams) for grams in n_grams])
+        ngram_list.append([' '.join(grams) for grams in n_grams])
     return ngram_list
 
 
@@ -62,5 +66,4 @@ def capitalize_all_words(s):
         result = result + word.capitalize() + ' '
     return result.strip()
 
-
-pprint(get_relevant_concepts_from_dbpedia('president obama white house'))
+# pprint(get_relevant_concepts_from_dbpedia('president obama white house'))
