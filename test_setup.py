@@ -4,7 +4,9 @@ import pyspotlight
 import pytrec_eval
 import json
 import scipy
+import  numpy as np
 from elasticsearch import Elasticsearch
+
 
 def retrieve_queries() -> list:
     results = []
@@ -17,7 +19,8 @@ def retrieve_queries() -> list:
             num = num + 1
     return results
 
-def retrieve_qrels() -> list:
+
+def retrieve_qrels() -> dict:
     results = {}
     file = open("qrels.701-850.txt")
     for line in file:
@@ -25,10 +28,12 @@ def retrieve_qrels() -> list:
         qnum = split_line[0]
         docnum = split_line[2]
         relevance = split_line[3]
-        if ~(qnum in results):
+        if qnum not in results:
             results[qnum] = {}
-        results[qnum][docnum] =relevance
+        if docnum <= "GX014-62-9987605":
+            results[qnum][docnum] = int(relevance)
     return results
+
 
 def retrieve_Q2A() -> list:
     results = []
@@ -38,8 +43,9 @@ def retrieve_Q2A() -> list:
         query = split_line[0]
         article = split_line[1]
         rel = split_line[2]
-        results.append(query, article, rel)
+        results.append((query, article, rel))
     return results
+
 
 def retrieve_concepts(queries: list) -> list:
     results = []
@@ -58,7 +64,8 @@ def retrieve_features(concept_lists: list) -> list:
         results.append((num, features))
     return results
 
-def retieve_search_results(queries: list) -> list:
+
+def retrieve_search_results(queries: list) -> list:
     results = []
     for q in queries:   
         (query, num) = q
@@ -72,30 +79,55 @@ def retieve_search_results(queries: list) -> list:
         results.append((query, num, res))
     return results
 
-def reshape_search_results(results: list ) -> dict
+
+def reshape_search_results(results: list) -> dict:
     out = {}
-    for result in list:
+    for result in results:
         (query, qnum, res) = result
-        out[qnum] = {}
+        out[str(qnum)] = {}
         for hit in res['hits']['hits']:
             rel = hit["_score"]
             docnum = hit["_id"]
-            out[qnum][docnum] = rel
+            out[str(qnum)][docnum] = rel
     return out
 
+
 def evaluate_results(results_base: dict, results_wiki: dict, qrels: dict):
-    evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map'})
+    metrics = {'ndcg', 'map'}
+    evaluator = pytrec_eval.RelevanceEvaluator(qrels, metrics)
+
     eval_base = evaluator.evaluate(results_base)
     eval_wiki = evaluator.evaluate(results_wiki)
-    query_ids =  query_ids = list(set(eval_base.keys()) & set(eval_wiki.keys()))
-    base_scores = [eval_base[query_id][args.measure] for query_id in query_ids]
-    wiki_scores = [wiki_results[query_id][args.measure] for query_id in query_ids]
-    sign_test = scipy.stats.ttest_rel(base_scores,wiki_scores)
+    query_ids = list(set(eval_base.keys()) & set(eval_wiki.keys()))
+    base_scores = []
+    wiki_scores = []
+    for metric in metrics:
+        met_base_score = [eval_base[query_id][metric] for query_id in query_ids]
+        met_wiki_score = [eval_wiki[query_id][metric] for query_id in query_ids]
+        sign_test = scipy.stats.ttest_rel(met_base_score, met_wiki_score)
+        print(sign_test)
 
-es = Elasticsearch([{"host":"localhost", "port":"9200"}])
+        base_scores.append(met_base_score)
+        wiki_scores.append(met_wiki_score)
+
+    mean_base = np.mean(base_scores, axis=1)
+    mean_wiki = np.mean(wiki_scores, axis=1)
+
+    pprint(mean_base)
+    pprint(mean_wiki)
+
+
+es = Elasticsearch([{"host": "localhost", "port": "9200"}])
+
 qs = retrieve_queries()
+qrls = retrieve_qrels()
+srch_res = retrieve_search_results(qs)
+srch_dic = reshape_search_results(srch_res)
+evaluate_results(srch_dic, srch_dic, qrls)
+
+#pprint(srch_res)
 # pprint(qs)
 cls = retrieve_concepts(qs)
-pprint(cls)
+#pprint(cls)
 fts = retrieve_features(cls)
-pprint(fts)
+#pprint(fts)
