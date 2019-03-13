@@ -1,5 +1,6 @@
 import spotlight
-import DBPediaRequest
+import requests
+from DBPediaRequest import DBPediaRequest
 from pprint import pprint
 from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
@@ -51,13 +52,30 @@ def get_uris(candidates: list) -> list:
     return result_list
 
 
-def get_ngrams(text):
+def get_ngrams(text: str) -> list:
     ngram_list = []
     for i in range(1, len(text.split()) + 1):
         n_grams = ngrams(word_tokenize(text), i)
         ngram_list.append([' '.join(grams) for grams in n_grams])
     return ngram_list
 
+def create_uri_from_string(subject: str) -> str:
+    return subject.replace(' ', '_')
+
+def get_candidate_list_using_ngrams(query: str) -> list:
+    result_list = []
+    ngram_list = get_ngrams(query)
+    for ngrams_per_length in ngram_list:
+        for ngram in ngrams_per_length:
+            try:
+                uri = create_uri_from_string(create_uri_from_string(capitalize_all_words(ngram)))
+                DBPediaRequest(uri)
+                result_list.append(uri)
+            except KeyError:
+                # This DBPedia article does not exist
+                continue
+
+    return result_list
 
 def capitalize_all_words(s):
     result = ""
@@ -66,4 +84,8 @@ def capitalize_all_words(s):
         result = result + word.capitalize() + ' '
     return result.strip()
 
-# pprint(get_relevant_concepts_from_dbpedia('president obama white house'))
+# Method 1, using DBPedia spotlight and thus using relevance in the knowledge graph
+pprint(get_uris(get_relevant_concepts_from_dbpedia('president obama white house')))
+
+# Method 2, using requests to check if a certain DBPedia page exists and returning it if it does
+pprint(get_candidate_list_using_ngrams('president obama white house'))
