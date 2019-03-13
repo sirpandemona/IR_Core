@@ -72,12 +72,22 @@ def retieve_search_results(queries: list) -> list:
         results.append((query, num, res))
     return results
 
+def reshape_search_results(results: list ) -> dict
+    out = {}
+    for result in list:
+        (query, qnum, res) = result
+        out[qnum] = {}
+        for hit in res['hits']['hits']:
+            rel = hit["_score"]
+            docnum = hit["_id"]
+            out[qnum][docnum] = rel
+    return out
+
 def evaluate_results(results_base: dict, results_wiki: dict, qrels: dict):
     evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map'})
     eval_base = evaluator.evaluate(results_base)
     eval_wiki = evaluator.evaluate(results_wiki)
-    query_ids =  query_ids = list(
-        set(eval_base.keys()) & set(eval_wiki.keys()))
+    query_ids =  query_ids = list(set(eval_base.keys()) & set(eval_wiki.keys()))
     base_scores = [eval_base[query_id][args.measure] for query_id in query_ids]
     wiki_scores = [wiki_results[query_id][args.measure] for query_id in query_ids]
     sign_test = scipy.stats.ttest_rel(base_scores,wiki_scores)
