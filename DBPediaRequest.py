@@ -1,5 +1,5 @@
 import requests
-
+from pprint import pprint
 
 class DBPediaRequest:
     def __init__(self, uri):
@@ -18,13 +18,20 @@ class DBPediaRequest:
         return result_list
 
     def get_dbpedia_url(self):
-        return self.dbpedia_url
+        return str(self.dbpedia_url)
 
-    def print_all_information_of_subject(self):
+    def get_abstract_of_subject(self):
         information_list = self.get_related_subject_list()
-        print(self.dbpedia_url)
-        for key in information_list:
+        key = information_list[0]
+        abstracts = self.resource['http://dbpedia.org/ontology/' + key]
+
+        for entry in abstracts:
             try:
-                print(key + ': ' + str(self.resource['http://dbpedia.org/ontology/' + key]))
+                if entry['lang'] == 'en':
+                    return entry['value']
+                else:
+                    continue
             except KeyError:
+                # Last entry of abstracts has no index called 'lang', do nothing but catch error
                 pass
+
