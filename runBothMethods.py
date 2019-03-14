@@ -4,11 +4,11 @@ from ngramranking import rank_candidate_list, get_candidate_list_using_ngrams, g
 
 
 # The query
-query = 'Aspirin cancer prevention'
+query = 'Controlling type II diabetes'
 
 # Method 1, using DBPedia spotlight and thus using relevance in the knowledge graph
-confidence = 0.2
-support = 50
+confidence = 0.6
+support = 100
 print("Method 1 ranked results:")
 pprint(get_uris(get_relevant_concepts_from_dbpedia(query, confidence, support)))
 pprint(rank_dbpedia_spotlight_candidates(get_relevant_concepts_from_dbpedia(query, confidence, support)))

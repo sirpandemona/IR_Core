@@ -32,6 +32,7 @@ def get_candidate_list_using_ngrams(query: str) -> list:
 
     return result_list
 
+
 def get_candidates_with_abstract(candidate_list: list) -> list:
     abstract_list = []
     for candidate in candidate_list:
@@ -60,33 +61,35 @@ def preprocess_by_tokenizing(query: str, abstract_list: list):
         if abstract is not None:
             raw_documents.append(abstract)
 
-    # remove common words and tokenize
-    stoplist = set('for a of the and to in'.split())
-    documents_common_words_removed = [[word for word in document.lower().split() if word not in stoplist]
-                  for document in raw_documents]
+    # Check to ensure that if there are no pages with an abstract, we abort
+    if len(raw_documents) != 0:
+        # remove common words and tokenize
+        stoplist = set('for a of the and to in'.split())
+        documents_common_words_removed = [[word for word in document.lower().split() if word not in stoplist]
+                      for document in raw_documents]
 
-    # remove words that appear only once
-    frequency = defaultdict(int)
-    for text in documents_common_words_removed:
-        for token in text:
-            frequency[token] += 1
+        # remove words that appear only once
+        frequency = defaultdict(int)
+        for text in documents_common_words_removed:
+            for token in text:
+                frequency[token] += 1
 
-    gen_docs = [[token for token in text if frequency[token] > 1]
-                  for text in documents_common_words_removed]
+        gen_docs = [[token for token in text if frequency[token] > 1]
+                      for text in documents_common_words_removed]
 
 
-    dictionary = gensim.corpora.Dictionary(gen_docs)
-    corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
-    tf_idf = gensim.models.TfidfModel(corpus)
+        dictionary = gensim.corpora.Dictionary(gen_docs)
+        corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
+        tf_idf = gensim.models.TfidfModel(corpus)
 
-    sims = gensim.similarities.Similarity('', tf_idf[corpus],
-                                      num_features=len(dictionary))
+        sims = gensim.similarities.Similarity('', tf_idf[corpus],
+                                          num_features=len(dictionary))
 
-    query_doc = [w.lower() for w in word_tokenize(query)]
-    query_doc_bow = dictionary.doc2bow(query_doc)
-    query_doc_tf_idf = tf_idf[query_doc_bow]
+        query_doc = [w.lower() for w in word_tokenize(query)]
+        query_doc_bow = dictionary.doc2bow(query_doc)
+        query_doc_tf_idf = tf_idf[query_doc_bow]
 
-    return sims[query_doc_tf_idf]
+        return sims[query_doc_tf_idf]
 
 
 def capitalize_all_words(s):
