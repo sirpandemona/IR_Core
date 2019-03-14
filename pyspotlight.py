@@ -14,7 +14,7 @@ def rank_dbpedia_spotlight_candidates(candidates: list) -> list:
     result_list = []
     try:
         for candidate in candidates:
-            result_list.append(candidate['resource']['support'])
+            result_list.append(candidate['resource']['contextualScore'])
     except TypeError:
             pass
 

@@ -4,7 +4,7 @@ from ngramranking import rank_candidate_list, get_candidate_list_using_ngrams, g
 
 
 # The query
-query = 'Cruise ship damage sea life'
+query = 'U.S. against International Criminal Court'
 
 # Method 1, using DBPedia spotlight and thus using relevance in the knowledge graph
 confidence = 0.2
