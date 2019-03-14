@@ -4,6 +4,7 @@ from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
 import gensim
 import warnings
+from collections import defaultdict
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def get_ngrams(text: str) -> list:
@@ -43,8 +44,6 @@ def rank_candidate_list(query: str, candidate_list: list):
     preprocess_by_tokenizing(query, abstract_list)
 
 
-
-
 def preprocess_by_tokenizing(query: str, abstract_list: list):
     raw_documents = []
     for abstract in abstract_list:
@@ -53,22 +52,19 @@ def preprocess_by_tokenizing(query: str, abstract_list: list):
             raw_documents.append(abstract)
 
     # # remove common words and tokenize
-    # stoplist = set('for a of the and to in'.split())
-    # documents_common_words_removed = [[word for word in document.lower().split() if word not in stoplist]
-    #               for document in raw_documents]
-    #
-    # # remove words that appear only once
-    # frequency = defaultdict(int)
-    # for text in documents_common_words_removed:
-    #     for token in text:
-    #         frequency[token] += 1
-    #
-    # gen_docs = [[token for token in text if frequency[token] > 1]
-    #               for text in documents_common_words_removed]
+    stoplist = set('for a of the and to in'.split())
+    documents_common_words_removed = [[word for word in document.lower().split() if word not in stoplist]
+                  for document in raw_documents]
 
-    #
-    gen_docs = [[w.lower() for w in word_tokenize(text)]
-                for text in raw_documents]
+    # remove words that appear only once
+    frequency = defaultdict(int)
+    for text in documents_common_words_removed:
+        for token in text:
+            frequency[token] += 1
+
+    gen_docs = [[token for token in text if frequency[token] > 1]
+                  for text in documents_common_words_removed]
+
 
     dictionary = gensim.corpora.Dictionary(gen_docs)
     corpus = [dictionary.doc2bow(gen_doc) for gen_doc in gen_docs]
@@ -95,4 +91,4 @@ def capitalize_all_words(s):
 def create_uri_from_string(subject: str) -> str:
     return subject.replace(' ', '_')
 
-rank_candidate_list('U.S. against International Criminal Court', get_candidate_list_using_ngrams('U.S. against International Criminal Court'))
+rank_candidate_list('Aspirin cancer prevention', get_candidate_list_using_ngrams('Aspirin cancer prevention'))
