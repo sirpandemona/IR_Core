@@ -7,6 +7,7 @@ import warnings
 from collections import defaultdict
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+
 def get_ngrams(text: str) -> list:
     ngram_list = []
     for i in range(1, len(text.split()) + 1):
@@ -51,7 +52,7 @@ def preprocess_by_tokenizing(query: str, abstract_list: list):
         if abstract is not None:
             raw_documents.append(abstract)
 
-    # # remove common words and tokenize
+    # remove common words and tokenize
     stoplist = set('for a of the and to in'.split())
     documents_common_words_removed = [[word for word in document.lower().split() if word not in stoplist]
                   for document in raw_documents]
@@ -90,5 +91,3 @@ def capitalize_all_words(s):
 
 def create_uri_from_string(subject: str) -> str:
     return subject.replace(' ', '_')
-
-rank_candidate_list('Aspirin cancer prevention', get_candidate_list_using_ngrams('Aspirin cancer prevention'))

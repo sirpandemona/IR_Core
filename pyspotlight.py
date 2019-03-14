@@ -46,8 +46,10 @@ def get_uris(candidates: list) -> list:
 
     return result_list
 
-# Method 1, using DBPedia spotlight and thus using relevance in the knowledge graph
-pprint(get_uris(get_relevant_concepts_from_dbpedia('president obama white house')))
 
-# Method 2, using requests to check if a certain DBPedia page exists and returning it if it does
-pprint(get_candidate_list_using_ngrams('president obama white house'))
+def capitalize_all_words(s):
+    result = ""
+    s_list = s.split(' ')
+    for word in s_list:
+        result = result + word.capitalize() + ' '
+    return result.strip()
