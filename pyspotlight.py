@@ -12,8 +12,11 @@ def get_relevant_concepts_from_dbpedia(query: str, confidence: float, support: i
 
 def rank_dbpedia_spotlight_candidates(candidates: list) -> list:
     result_list = []
-    for candidate in candidates:
-        result_list.append(candidate['resource']['finalScore'])
+    try:
+        for candidate in candidates:
+            result_list.append(candidate['resource']['support'])
+    except TypeError:
+            pass
 
     return result_list
 
@@ -25,8 +28,11 @@ def print_information_of_dbpedia_concepts(dbpedia_concept_list: list):
 
 def get_uris(candidates: list) -> list:
     result_list = []
-    for candidate in candidates:
-        result_list.append(candidate['resource']['uri'])
+    try:
+        for candidate in candidates:
+            result_list.append(candidate['resource']['uri'])
+    except TypeError:
+            pass
 
     return result_list
 
