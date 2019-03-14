@@ -1,35 +1,19 @@
 import spotlight
 from pprint import pprint
 
-def get_relevant_concepts_from_dbpedia(query: str) -> list:
+
+def get_relevant_concepts_from_dbpedia(query: str, confidence: float, support: int) -> list:
     try:
         return spotlight.candidates("http://model.dbpedia-spotlight.org/en/candidates", capitalize_all_words(query),
-                                    confidence=0.5, support=20, spotter='Default')
+                                    confidence, support, spotter='Default')
     except spotlight.SpotlightException:
         return [] #nothing found; return empty list
 
 
-def get_n_resources_with_highest_support(n: int, candidates: list) -> list:
+def rank_dbpedia_spotlight_candidates(candidates: list) -> list:
     result_list = []
-    contained_uri_list = []
     for candidate in candidates:
-        if len(result_list) < n:
-            candidate_uri = candidate['resource']['uri']
-            if not contained_uri_list.__contains__(candidate_uri):
-                result_list.append(candidate)
-                contained_uri_list.append(candidate_uri)
-        else:
-            for entry in result_list:
-                current_candidate_support = candidate['resource']['support']
-                current_entry_support = entry['resource']['support']
-                candidate_uri = candidate['resource']['uri']
-                entry_uri = entry['resource']['uri']
-                if current_candidate_support > current_entry_support and not contained_uri_list.__contains__(
-                        candidate_uri):
-                    result_list.remove(entry)
-                    contained_uri_list.remove(entry_uri)
-                    result_list.append(candidate)
-                    contained_uri_list.append(candidate_uri)
+        result_list.append(candidate['resource']['finalScore'])
 
     return result_list
 
