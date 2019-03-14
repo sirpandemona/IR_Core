@@ -32,17 +32,25 @@ def get_candidate_list_using_ngrams(query: str) -> list:
 
     return result_list
 
+def get_candidates_with_abstract(candidate_list: list) -> list:
+    abstract_list = []
+    for candidate in candidate_list:
+        abstract_list.append(candidate.get_abstract_of_subject())
+
+    result_list = []
+    for i in range(0, len(abstract_list)):
+        if abstract_list[i] is not None:
+            result_list.append(candidate_list[i].get_uri())
+
+    return result_list
+
 
 def rank_candidate_list(query: str, candidate_list: list):
     abstract_list = []
     for candidate in candidate_list:
         abstract_list.append(candidate.get_abstract_of_subject())
 
-    for i in range(0, len(abstract_list)):
-        if abstract_list[i] is not None:
-            print(candidate_list[i].get_dbpedia_url())
-
-    preprocess_by_tokenizing(query, abstract_list)
+    return preprocess_by_tokenizing(query, abstract_list)
 
 
 def preprocess_by_tokenizing(query: str, abstract_list: list):
@@ -78,7 +86,7 @@ def preprocess_by_tokenizing(query: str, abstract_list: list):
     query_doc_bow = dictionary.doc2bow(query_doc)
     query_doc_tf_idf = tf_idf[query_doc_bow]
 
-    print(sims[query_doc_tf_idf])
+    return sims[query_doc_tf_idf]
 
 
 def capitalize_all_words(s):

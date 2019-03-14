@@ -21,6 +21,9 @@ class DBPediaRequest:
     def get_dbpedia_url(self):
         return str(self.dbpedia_url)
 
+    def get_uri(self):
+        return self.uri
+
     def get_abstract_of_subject(self) -> str:
         information_list = self.get_related_subject_list()
         key = information_list[0]
